@@ -146,19 +146,36 @@ function pageUrl($page, $tag) {
         <div class="col-md-9">
 
             <!-- Pagination top -->
-            <?php if ($totalPages > 1): ?>
-                <nav class="mb-3">
-                    <ul class="pagination">
-                        <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                            <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                                <a class="page-link" href="<?= pageUrl($i, $tag) ?>">
-                                    <?= $i ?>
-                                </a>
-                            </li>
-                        <?php endfor; ?>
-                    </ul>
-                </nav>
-            <?php endif; ?>
+<?php if ($totalPages > 1): ?>
+    <nav class="mb-3">
+        <ul class="pagination">
+
+            <!-- Previous -->
+            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                <a class="page-link" href="<?= pageUrl($page - 1, $tag) ?>">
+                    Previous
+                </a>
+            </li>
+
+            <!-- Page numbers -->
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                    <a class="page-link" href="<?= pageUrl($i, $tag) ?>">
+                        <?= $i ?>
+                    </a>
+                </li>
+            <?php endfor; ?>
+
+            <!-- Next -->
+            <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                <a class="page-link" href="<?= pageUrl($page + 1, $tag) ?>">
+                    Next
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+<?php endif; ?>
 
             <?php foreach ($items as $item): ?>
 
@@ -209,6 +226,38 @@ function pageUrl($page, $tag) {
                 </div>
 
             <?php endforeach; ?>
+
+<!-- Pagination bottom -->
+<?php if ($totalPages > 1): ?>
+    <nav class="mb-3">
+        <ul class="pagination">
+
+            <!-- Previous -->
+            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
+                <a class="page-link" href="<?= pageUrl($page - 1, $tag) ?>">
+                    Previous
+                </a>
+            </li>
+
+            <!-- Page numbers -->
+            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
+                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
+                    <a class="page-link" href="<?= pageUrl($i, $tag) ?>">
+                        <?= $i ?>
+                    </a>
+                </li>
+            <?php endfor; ?>
+
+            <!-- Next -->
+            <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
+                <a class="page-link" href="<?= pageUrl($page + 1, $tag) ?>">
+                    Next
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+<?php endif; ?>
 
         </div>
     </div>
