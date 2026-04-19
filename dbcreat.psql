@@ -1,0 +1,52 @@
+-- 1. Create user
+CREATE USER reviews_user WITH PASSWORD 'strong_password_here';
+
+-- 2. (Optional) Create database and assign ownership
+CREATE DATABASE reviews_db OWNER reviews_user;
+
+-- Connect to the database before running the rest
+\c reviews_db
+
+-- 3. Create schema
+CREATE SCHEMA reviews AUTHORIZATION reviews_user;
+
+-- 4. Create table
+CREATE TABLE reviews.items (
+    id SERIAL PRIMARY KEY,
+    date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    title TEXT NOT NULL,
+    link TEXT,
+    review TEXT,
+    rating NUMERIC(3,2),
+    tags TEXT
+);
+
+CREATE TABLE reviews.comments (
+    id SERIAL PRIMARY KEY,
+    review_item INTEGER NOT NULL,
+    date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    username TEXT NOT NULL,
+    comment TEXT NOT NULL,
+    rating INTEGER,
+
+    -- Foreign key to items table
+    CONSTRAINT fk_review_item
+        FOREIGN KEY (review_item)
+        REFERENCES reviews.items(id)
+        ON DELETE CASCADE,
+
+    -- Rating constraint
+    CONSTRAINT rating_range CHECK (rating >= 1 AND rating <= 5)
+);
+
+-- 5. Optional: Add constraints
+ALTER TABLE reviews.items
+ADD CONSTRAINT rating_range CHECK (rating >= 1 AND rating <= 5);
+
+CREATE INDEX idx_comments_review_item
+ON reviews.comments(review_item);
+
+-- 6. Grant privileges
+GRANT ALL PRIVILEGES ON SCHEMA reviews TO reviews_user;
+GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA reviews TO reviews_user;
+GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA reviews TO reviews_user;
