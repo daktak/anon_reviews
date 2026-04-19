@@ -1,15 +1,17 @@
 <?php
 require 'config.php';
 
+$isAdmin = $_SESSION['is_admin'] ?? false;
+
 $item_id = $_GET['id'] ?? null;
 
 if (!$item_id || !is_numeric($item_id)) {
-    die("Invalid item ID");
+    die("Invalid ID");
 }
 
 /*
 |--------------------------------------------------------------------------
-| Pagination + sorting
+| Pagination + sort
 |--------------------------------------------------------------------------
 */
 $page = max(1, (int)($_GET['page'] ?? 1));
@@ -17,7 +19,7 @@ $perPage = 5;
 $offset = ($page - 1) * $perPage;
 
 $sort = $_GET['sort'] ?? 'newest';
-if (!in_array($sort, ['newest', 'rating'], true)) {
+if (!in_array($sort, ['newest','rating'], true)) {
     $sort = 'newest';
 }
 
@@ -27,42 +29,27 @@ if (!in_array($sort, ['newest', 'rating'], true)) {
 |--------------------------------------------------------------------------
 */
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $username = $_POST['username'] ?? '';
     $comment  = $_POST['comment'] ?? '';
     $rating   = $_POST['rating'] ?? '';
 
     if ($username && $comment && is_numeric($rating)) {
-        try {
-            $stmt = $pdo->prepare("
-                INSERT INTO reviews.comments (review_item, username, comment, rating)
-                VALUES (:item_id, :username, :comment, :rating)
-            ");
 
-            $stmt->execute([
-                ':item_id'  => $item_id,
-                ':username' => $username,
-                ':comment'  => $comment,
-                ':rating'   => (float)$rating
-            ]);
+        $stmt = $pdo->prepare("
+            INSERT INTO reviews.comments (review_item, username, comment, rating)
+            VALUES (:item_id, :username, :comment, :rating)
+        ");
 
-            $stmt = $pdo->prepare("
-                UPDATE reviews.items
-                SET rating = (
-                    SELECT AVG(rating)
-                    FROM reviews.comments
-                    WHERE review_item = :item_id
-                )
-                WHERE id = :item_id
-            ");
+        $stmt->execute([
+            ':item_id'  => $item_id,
+            ':username' => $username,
+            ':comment'  => $comment,
+            ':rating'   => (float)$rating
+        ]);
 
-            $stmt->execute([':item_id' => $item_id]);
-
-            header("Location: item.php?id=$item_id");
-            exit;
-
-        } catch (PDOException $e) {
-            die($e->getMessage());
-        }
+        header("Location: item.php?id=$item_id");
+        exit;
     }
 }
 
@@ -72,16 +59,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 |--------------------------------------------------------------------------
 */
 $stmt = $pdo->prepare("
-    SELECT id, date_added, title, link, review, rating, tags
-    FROM reviews.items
-    WHERE id = :id
+    SELECT * FROM reviews.items WHERE id = :id
 ");
 
 $stmt->execute([':id' => $item_id]);
 $item = $stmt->fetch();
 
 if (!$item) {
-    die("Item not found");
+    die("Not found");
+}
+
+/*
+|--------------------------------------------------------------------------
+| Delete comment (ADMIN ONLY - server side protection)
+|--------------------------------------------------------------------------
+*/
+if ($isAdmin && isset($_GET['delete_comment'])) {
+
+    $cid = (int)$_GET['delete_comment'];
+
+    $del = $pdo->prepare("
+        DELETE FROM reviews.comments
+        WHERE id = :cid AND review_item = :item_id
+    ");
+
+    $del->execute([
+        ':cid' => $cid,
+        ':item_id' => $item_id
+    ]);
+
+    header("Location: item.php?id=$item_id");
+    exit;
 }
 
 /*
@@ -89,32 +97,29 @@ if (!$item) {
 | Count comments
 |--------------------------------------------------------------------------
 */
-$countStmt = $pdo->prepare("
-    SELECT COUNT(*)
-    FROM reviews.comments
-    WHERE review_item = :id
+$count = $pdo->prepare("
+    SELECT COUNT(*) FROM reviews.comments WHERE review_item = :id
 ");
-
-$countStmt->execute([':id' => $item_id]);
-$totalComments = (int)$countStmt->fetchColumn();
-$totalPages = max(1, ceil($totalComments / $perPage));
+$count->execute([':id' => $item_id]);
+$total = (int)$count->fetchColumn();
+$totalPages = max(1, ceil($total / $perPage));
 
 /*
 |--------------------------------------------------------------------------
-| Sort logic
+| Sort
 |--------------------------------------------------------------------------
 */
 $orderBy = $sort === 'rating'
-    ? 'rating DESC, date_added DESC'
-    : 'date_added DESC';
+    ? "rating DESC, date_added DESC"
+    : "date_added DESC";
 
 /*
 |--------------------------------------------------------------------------
-| Fetch comments (paginated)
+| Fetch comments
 |--------------------------------------------------------------------------
 */
 $stmt = $pdo->prepare("
-    SELECT username, comment, rating, date_added
+    SELECT id, username, comment, rating, date_added
     FROM reviews.comments
     WHERE review_item = :id
     ORDER BY $orderBy
@@ -133,8 +138,8 @@ $comments = $stmt->fetchAll();
 | Pagination helper
 |--------------------------------------------------------------------------
 */
-function pageUrl($item_id, $page, $sort) {
-    return "item.php?id=$item_id&page=$page&sort=" . urlencode($sort);
+function pageUrl($id, $page, $sort) {
+    return "item.php?id=$id&page=$page&sort=" . urlencode($sort);
 }
 ?>
 
@@ -150,162 +155,129 @@ function pageUrl($item_id, $page, $sort) {
 <div class="container py-4">
 
     <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0"><?= htmlspecialchars($item['title']) ?></h1>
-        <a href="index.php" class="btn btn-outline-secondary">← Back</a>
-    </div>
+    <div class="d-flex justify-content-between align-items-center">
 
-    <!-- Item -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body">
+        <h2><?= htmlspecialchars($item['title']) ?></h2>
 
-            <small class="text-muted d-block mb-2">
-                <?= htmlspecialchars($item['date_added']) ?>
-            </small>
+        <div class="d-flex gap-2">
 
-            <?php if (!empty($item['link'])): ?>
-                <a href="<?= htmlspecialchars($item['link']) ?>" target="_blank"
-                   class="btn btn-sm btn-outline-primary mb-2">
-                    View Link
+            <?php if ($isAdmin): ?>
+                <a href="logout.php" class="btn btn-outline-danger btn-sm">
+                    Logout
                 </a>
             <?php endif; ?>
 
-            <p class="card-text">
-                <?= nl2br(htmlspecialchars($item['review'])) ?>
-            </p>
+            <a href="index.php" class="btn btn-secondary btn-sm">
+                Back
+            </a>
+
+        </div>
+
+    </div>
+
+    <hr>
+
+    <!-- Item -->
+    <div class="card mb-3">
+        <div class="card-body">
+
+            <small class="text-muted"><?= $item['date_added'] ?></small>
+
+            <p class="mt-2"><?= nl2br(htmlspecialchars($item['review'])) ?></p>
 
             <span class="badge bg-secondary">
-                Rating: <?= $item['rating'] ? round($item['rating'], 2) : 'N/A' ?>/5
+                <?= $item['rating'] ? round($item['rating'],2) : 'N/A' ?>/5
             </span>
-
-            <?php if (!empty($item['tags'])): ?>
-                <div class="mt-3">
-                    <?php foreach (explode(',', $item['tags']) as $t): ?>
-                        <?php $t = trim($t); ?>
-                        <span class="badge bg-primary me-1"><?= htmlspecialchars($t) ?></span>
-                    <?php endforeach; ?>
-                </div>
-            <?php endif; ?>
 
         </div>
     </div>
 
-    <!-- Comments header + sort toggle -->
+    <!-- Comments header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
+
         <h4 class="mb-0">Comments</h4>
 
         <div class="btn-group">
-            <a href="<?= pageUrl($item_id, 1, 'newest') ?>"
-               class="btn btn-sm <?= $sort === 'newest' ? 'btn-primary' : 'btn-outline-primary' ?>">
+            <a class="btn btn-sm <?= $sort=='newest'?'btn-primary':'btn-outline-primary' ?>"
+               href="<?= pageUrl($item_id,1,'newest') ?>">
                 Newest
             </a>
 
-            <a href="<?= pageUrl($item_id, 1, 'rating') ?>"
-               class="btn btn-sm <?= $sort === 'rating' ? 'btn-primary' : 'btn-outline-primary' ?>">
+            <a class="btn btn-sm <?= $sort=='rating'?'btn-primary':'btn-outline-primary' ?>"
+               href="<?= pageUrl($item_id,1,'rating') ?>">
                 Top Rated
             </a>
         </div>
+
     </div>
 
-    <!-- Top pagination -->
-    <?php if ($totalPages > 1): ?>
-        <nav class="mb-3">
-            <ul class="pagination">
-
-                <?php if ($page > 1): ?>
-                    <li class="page-item">
-                        <a class="page-link" href="<?= pageUrl($item_id, $page - 1, $sort) ?>">Previous</a>
-                    </li>
-                <?php endif; ?>
-
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= pageUrl($item_id, $i, $sort) ?>">
-                            <?= $i ?>
-                        </a>
-                    </li>
-                <?php endfor; ?>
-
-                <?php if ($page < $totalPages): ?>
-                    <li class="page-item">
-                        <a class="page-link" href="<?= pageUrl($item_id, $page + 1, $sort) ?>">Next</a>
-                    </li>
-                <?php endif; ?>
-
-            </ul>
-        </nav>
-    <?php endif; ?>
+    <!-- Pagination top -->
+    <ul class="pagination">
+        <?php for ($i=1;$i<=$totalPages;$i++): ?>
+            <li class="page-item <?= $i==$page?'active':'' ?>">
+                <a class="page-link" href="<?= pageUrl($item_id,$i,$sort) ?>">
+                    <?= $i ?>
+                </a>
+            </li>
+        <?php endfor; ?>
+    </ul>
 
     <!-- Comments -->
-    <?php if ($comments): ?>
-        <?php foreach ($comments as $c): ?>
-            <div class="card mb-2">
-                <div class="card-body">
+    <?php foreach ($comments as $c): ?>
 
-                    <div class="d-flex justify-content-between">
+        <div class="card mb-2">
+            <div class="card-body">
+
+                <div class="d-flex justify-content-between align-items-center">
+
+                    <div>
                         <strong><?= htmlspecialchars($c['username']) ?></strong>
                         <span class="badge bg-secondary"><?= $c['rating'] ?>/5</span>
                     </div>
 
-                    <p class="mb-1"><?= nl2br(htmlspecialchars($c['comment'])) ?></p>
-
-                    <small class="text-muted"><?= $c['date_added'] ?></small>
+                    <?php if ($isAdmin): ?>
+                        <a href="item.php?id=<?= $item_id ?>&delete_comment=<?= $c['id'] ?>"
+                           class="btn btn-sm btn-danger"
+                           onclick="return confirm('Delete comment?')">
+                            Delete
+                        </a>
+                    <?php endif; ?>
 
                 </div>
+
+                <p class="mb-1"><?= htmlspecialchars($c['comment']) ?></p>
+
+                <small class="text-muted"><?= $c['date_added'] ?></small>
+
             </div>
-        <?php endforeach; ?>
-    <?php else: ?>
-        <div class="alert alert-info">No comments yet.</div>
-    <?php endif; ?>
+        </div>
 
-    <!-- Bottom pagination -->
-    <?php if ($totalPages > 1): ?>
-        <nav class="mt-3">
-            <ul class="pagination">
+    <?php endforeach; ?>
 
-                <?php if ($page > 1): ?>
-                    <li class="page-item">
-                        <a class="page-link" href="<?= pageUrl($item_id, $page - 1, $sort) ?>">Previous</a>
-                    </li>
-                <?php endif; ?>
-
-                <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                    <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                        <a class="page-link" href="<?= pageUrl($item_id, $i, $sort) ?>">
-                            <?= $i ?>
-                        </a>
-                    </li>
-                <?php endfor; ?>
-
-                <?php if ($page < $totalPages): ?>
-                    <li class="page-item">
-                        <a class="page-link" href="<?= pageUrl($item_id, $page + 1, $sort) ?>">Next</a>
-                    </li>
-                <?php endif; ?>
-
-            </ul>
-        </nav>
-    <?php endif; ?>
+    <!-- Pagination bottom -->
+    <ul class="pagination">
+        <?php for ($i=1;$i<=$totalPages;$i++): ?>
+            <li class="page-item <?= $i==$page?'active':'' ?>">
+                <a class="page-link" href="<?= pageUrl($item_id,$i,$sort) ?>">
+                    <?= $i ?>
+                </a>
+            </li>
+        <?php endfor; ?>
+    </ul>
 
     <!-- Add comment -->
-    <div class="card shadow-sm mt-4">
+    <div class="card mt-4">
         <div class="card-body">
 
-            <h5 class="mb-3">Add Comment</h5>
+            <h5>Add Comment</h5>
 
             <form method="POST">
 
-                <div class="mb-2">
-                    <input type="text" name="username" class="form-control" placeholder="Your name" required>
-                </div>
+                <input class="form-control mb-2" name="username" placeholder="Name" required>
 
-                <div class="mb-2">
-                    <textarea name="comment" class="form-control" placeholder="Your comment" required></textarea>
-                </div>
+                <textarea class="form-control mb-2" name="comment" required></textarea>
 
-                <div class="mb-3">
-                    <input type="number" name="rating" class="form-control" min="1" max="5" placeholder="Rating (1-5)" required>
-                </div>
+                <input class="form-control mb-3" type="number" min="1" max="5" name="rating" required>
 
                 <button class="btn btn-primary">Submit</button>
 
