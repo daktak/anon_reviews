@@ -214,6 +214,20 @@ function pageUrl($page, $tag) {
     </div>
 
 </div>
+<!-- Footer notice -->
+<div class="text-center mt-5 mb-3">
+    <small class="text-muted">
+        Source code available at 
+        <a href="https://github.com/daktak/anon_reviews" target="_blank" rel="noopener">
+            https://github.com/daktak/anon_reviews
+        </a>
+        — licensed under GPL v3.
+        &nbsp;|&nbsp;
+        <a href="https://github.com/daktak/anon_reviews/issues" target="_blank" rel="noopener">
+            Report an issue
+        </a>
+    </small>
+</div>
 
 </body>
 </html>
