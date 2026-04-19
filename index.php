@@ -1,6 +1,8 @@
 <?php
 require 'config.php';
 
+$isAdmin = $_SESSION['is_admin'] ?? false;
+
 $tag  = $_GET['tag']  ?? null;
 $page = max(1, (int)($_GET['page'] ?? 1));
 $perPage = 10;
@@ -8,7 +10,7 @@ $offset = ($page - 1) * $perPage;
 
 /*
 |--------------------------------------------------------------------------
-| WHERE clause
+| Filter
 |--------------------------------------------------------------------------
 */
 $where = '';
@@ -21,13 +23,11 @@ if ($tag) {
 
 /*
 |--------------------------------------------------------------------------
-| Total count
+| Count
 |--------------------------------------------------------------------------
 */
 $countStmt = $pdo->prepare("
-    SELECT COUNT(*) 
-    FROM reviews.items
-    $where
+    SELECT COUNT(*) FROM reviews.items $where
 ");
 $countStmt->execute($params);
 $totalItems = (int)$countStmt->fetchColumn();
@@ -35,7 +35,7 @@ $totalPages = max(1, ceil($totalItems / $perPage));
 
 /*
 |--------------------------------------------------------------------------
-| Fetch items
+| Items
 |--------------------------------------------------------------------------
 */
 $stmt = $pdo->prepare("
@@ -57,11 +57,11 @@ $items = $stmt->fetchAll();
 
 /*
 |--------------------------------------------------------------------------
-| Tag cloud aggregation
+| Tags (cloud)
 |--------------------------------------------------------------------------
 */
 $tagStmt = $pdo->query("
-    SELECT tag, COUNT(*) as count
+    SELECT tag, COUNT(*) AS count
     FROM (
         SELECT trim(unnest(string_to_array(tags, ','))) AS tag
         FROM reviews.items
@@ -70,27 +70,18 @@ $tagStmt = $pdo->query("
     GROUP BY tag
     ORDER BY count DESC, tag ASC
 ");
+
 $tagCounts = $tagStmt->fetchAll();
 
-/*
-|--------------------------------------------------------------------------
-| Tag size scaling
-|--------------------------------------------------------------------------
-*/
 $counts = array_column($tagCounts, 'count');
-$minCount = $counts ? min($counts) : 0;
-$maxCount = $counts ? max($counts) : 1;
+$min = $counts ? min($counts) : 0;
+$max = $counts ? max($counts) : 1;
 
-function tagSize($count, $min, $max) {
+function tagSize($c, $min, $max) {
     if ($max == $min) return 1.2;
-    return 1 + (($count - $min) / ($max - $min)) * 1.5; // 1rem → 2.5rem
+    return 1 + (($c - $min) / ($max - $min)) * 1.5;
 }
 
-/*
-|--------------------------------------------------------------------------
-| Helper: pagination URL
-|--------------------------------------------------------------------------
-*/
 function pageUrl($page, $tag) {
     return '?page=' . $page . ($tag ? '&tag=' . urlencode($tag) : '');
 }
@@ -110,36 +101,38 @@ function pageUrl($page, $tag) {
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1 class="h3 mb-0">Reviews</h1>
-        <a href="add.php" class="btn btn-primary">+ Add Review</a>
+
+        <div>
+            <a href="add.php" class="btn btn-primary">+ Add</a>
+
+            <?php if ($isAdmin): ?>
+                <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+            <?php endif; ?>
+        </div>
     </div>
 
     <div class="row">
 
-        <!-- Sidebar: Tag Cloud -->
+        <!-- Tags -->
         <div class="col-md-3">
 
             <div class="card mb-3">
                 <div class="card-body">
 
-                    <div class="d-flex justify-content-between align-items-center mb-2">
-                        <h5 class="card-title mb-0">Tags</h5>
+                    <strong class="d-block mb-2">Tags</strong>
 
-                        <?php if ($tag): ?>
-                            <a href="index.php" class="btn btn-sm btn-danger">
-                                Reset
-                            </a>
-                        <?php endif; ?>
-                    </div>
+                    <?php if ($tag): ?>
+                        <a href="index.php" class="btn btn-sm btn-danger mb-2">Reset</a>
+                    <?php endif; ?>
 
                     <div>
                         <?php foreach ($tagCounts as $t):
-                            $name = $t['tag'];
-                            $size = tagSize($t['count'], $minCount, $maxCount);
+                            $size = tagSize($t['count'], $min, $max);
                         ?>
-                            <a href="?tag=<?= urlencode($name) ?>"
-                               style="font-size: <?= $size ?>rem; line-height: 2rem;"
-                               class="me-2 text-decoration-none d-inline-block">
-                                <?= htmlspecialchars($name) ?>
+                            <a href="?tag=<?= urlencode($t['tag']) ?>"
+                               style="font-size: <?= $size ?>rem"
+                               class="text-decoration-none me-2 d-inline-block">
+                                <?= htmlspecialchars($t['tag']) ?>
                             </a>
                         <?php endforeach; ?>
                     </div>
@@ -149,140 +142,73 @@ function pageUrl($page, $tag) {
 
         </div>
 
-        <!-- Main Content -->
+        <!-- Items -->
         <div class="col-md-9">
 
-            <!-- Active filter notice -->
-            <?php if ($tag): ?>
-                <div class="alert alert-warning d-flex justify-content-between align-items-center">
-                    <div>
-                        Filtering by tag: <strong><?= htmlspecialchars($tag) ?></strong>
-                    </div>
-                    <a href="index.php" class="btn btn-sm btn-danger">Reset</a>
-                </div>
-            <?php endif; ?>
-
-            <!-- Top Pagination -->
+            <!-- Pagination top -->
             <?php if ($totalPages > 1): ?>
                 <nav class="mb-3">
                     <ul class="pagination">
-
-                        <?php if ($page > 1): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="<?= pageUrl($page - 1, $tag) ?>">Previous</a>
-                            </li>
-                        <?php endif; ?>
-
                         <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                            <li class="page-item <?= $i === $page ? 'active' : '' ?>">
+                            <li class="page-item <?= $i == $page ? 'active' : '' ?>">
                                 <a class="page-link" href="<?= pageUrl($i, $tag) ?>">
                                     <?= $i ?>
                                 </a>
                             </li>
                         <?php endfor; ?>
-
-                        <?php if ($page < $totalPages): ?>
-                            <li class="page-item">
-                                <a class="page-link" href="<?= pageUrl($page + 1, $tag) ?>">Next</a>
-                            </li>
-                        <?php endif; ?>
-
                     </ul>
                 </nav>
             <?php endif; ?>
 
-            <!-- Items -->
-            <?php if (count($items) > 0): ?>
-                <?php foreach ($items as $item): ?>
+            <?php foreach ($items as $item): ?>
 
-                    <div class="card mb-3 shadow-sm">
-                        <div class="card-body">
+                <div class="card mb-3">
+                    <div class="card-body">
 
-                            <!-- Title -->
-                            <div class="d-flex justify-content-between align-items-start">
-                                <h3 class="card-title mb-1">
-                                    <a href="item.php?id=<?= $item['id'] ?>" class="text-decoration-none">
-                                        <?= htmlspecialchars($item['title']) ?>
-                                    </a>
-                                </h3>
+                        <div class="d-flex justify-content-between align-items-start">
 
-                                <?php if (!empty($item['link'])): ?>
-                                    <a href="<?= htmlspecialchars($item['link']) ?>" 
-                                       target="_blank" 
-                                       class="btn btn-sm btn-outline-primary">
-                                        View Link
-                                    </a>
-                                <?php endif; ?>
-                            </div>
+                            <h5 class="mb-1">
+                                <a href="item.php?id=<?= $item['id'] ?>">
+                                    <?= htmlspecialchars($item['title']) ?>
+                                </a>
+                            </h5>
 
-                            <!-- Date -->
-                            <small class="text-muted d-block mb-2">
-                                <?= htmlspecialchars($item['date_added']) ?>
-                            </small>
-
-                            <!-- Review -->
-                            <p class="card-text">
-                                <?= nl2br(htmlspecialchars($item['review'])) ?>
-                            </p>
-
-                            <!-- Rating -->
-                            <div class="mb-2">
-                                <span class="badge bg-secondary">
-                                    Rating: <?= $item['rating'] ? round($item['rating'], 2) : 'N/A' ?>/5
-                                </span>
-                            </div>
-
-                            <!-- Tags -->
-                            <?php if (!empty($item['tags'])): ?>
-                                <div class="mt-2">
-                                    <?php foreach (explode(',', $item['tags']) as $t): 
-                                        $t = trim($t);
-                                    ?>
-                                        <a href="?tag=<?= urlencode($t) ?>" 
-                                           class="badge bg-primary text-decoration-none me-1">
-                                            <?= htmlspecialchars($t) ?>
-                                        </a>
-                                    <?php endforeach; ?>
-                                </div>
+                            <?php if ($isAdmin): ?>
+                                <a href="delete.php?id=<?= $item['id'] ?>"
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Delete this item?')">
+                                    Delete
+                                </a>
                             <?php endif; ?>
 
                         </div>
-                    </div>
 
-                <?php endforeach; ?>
+                        <small class="text-muted d-block mb-2">
+                            <?= htmlspecialchars($item['date_added']) ?>
+                        </small>
 
-                <!-- Bottom Pagination -->
-                <?php if ($totalPages > 1): ?>
-                    <nav class="mt-3">
-                        <ul class="pagination">
+                        <p><?= nl2br(htmlspecialchars($item['review'])) ?></p>
 
-                            <?php if ($page > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="<?= pageUrl($page - 1, $tag) ?>">Previous</a>
-                                </li>
-                            <?php endif; ?>
+                        <span class="badge bg-secondary">
+                            Rating: <?= $item['rating'] ? round($item['rating'], 2) : 'N/A' ?>/5
+                        </span>
 
-                            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                                <li class="page-item <?= $i === $page ? 'active' : '' ?>">
-                                    <a class="page-link" href="<?= pageUrl($i, $tag) ?>">
-                                        <?= $i ?>
+                        <?php if (!empty($item['tags'])): ?>
+                            <div class="mt-2">
+                                <?php foreach (explode(',', $item['tags']) as $t): ?>
+                                    <?php $t = trim($t); ?>
+                                    <a href="?tag=<?= urlencode($t) ?>"
+                                       class="badge bg-primary text-decoration-none me-1">
+                                        <?= htmlspecialchars($t) ?>
                                     </a>
-                                </li>
-                            <?php endfor; ?>
+                                <?php endforeach; ?>
+                            </div>
+                        <?php endif; ?>
 
-                            <?php if ($page < $totalPages): ?>
-                                <li class="page-item">
-                                    <a class="page-link" href="<?= pageUrl($page + 1, $tag) ?>">Next</a>
-                                </li>
-                            <?php endif; ?>
+                    </div>
+                </div>
 
-                        </ul>
-                    </nav>
-                <?php endif; ?>
-
-            <?php else: ?>
-                <div class="alert alert-info">No reviews found.</div>
-            <?php endif; ?>
+            <?php endforeach; ?>
 
         </div>
     </div>
