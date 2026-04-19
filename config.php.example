@@ -1,7 +1,7 @@
 <?php
-$ADMIN_USER = 'admin';
-$ADMIN_PASS = 'password';
-
+$ADMIN_USERS = [
+    'admin' => 'password'
+];
 /*
 |--------------------------------------------------------------------------
 | Session (required for admin auth)

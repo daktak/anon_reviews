@@ -8,16 +8,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $user = $_POST['username'] ?? '';
     $pass = $_POST['password'] ?? '';
 
-    if ($user === $ADMIN_USER && $pass === $ADMIN_PASS) {
+    if (isset($ADMIN_USERS[$user]) && $ADMIN_USERS[$user] === $pass) {
+
         $_SESSION['is_admin'] = true;
+        $_SESSION['admin_user'] = $user;
+
         header("Location: index.php");
         exit;
+
     } else {
         $error = "Invalid login";
     }
 }
 ?>
-
 <!DOCTYPE html>
 <html>
 <head>
