@@ -7,7 +7,11 @@ $ADMIN_USERS = [
 | Session (required for admin auth)
 |--------------------------------------------------------------------------
 */
-session_start();
+session_start([
+    'cookie_httponly' => true,
+    'cookie_secure'   => isset($_SERVER['HTTPS']),
+    'cookie_samesite' => 'Lax'
+]);
 
 /*
 |--------------------------------------------------------------------------
