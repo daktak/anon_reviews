@@ -111,21 +111,30 @@ function pageUrl($page, $tag) {
             white-space: nowrap;
         }
 
-        .tag-chip {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 999px;
-            background: #e9ecef;
-            margin-right: 6px;
-            font-size: 0.85rem;
-            text-decoration: none;
-            color: #333;
-        }
+	.tag-cloud {
+	    display: flex;
+	    flex-wrap: wrap;
+	    gap: 6px 8px;
+	    max-height: 160px;     /* key reduction in scrolling */
+	    overflow-y: auto;      /* keeps it compact but scrollable if needed */
+	    padding: 6px;
+	}
 
-        .tag-chip.active {
-            background: #0d6efd;
-            color: #fff;
-        }
+	.tag-chip {
+	    display: inline-block;
+	    padding: 4px 10px;
+	    border-radius: 999px;
+	    background: #e9ecef;
+	    text-decoration: none;
+	    color: #333;
+	    line-height: 1.2;
+	    white-space: nowrap;
+	}
+
+	.tag-chip.active {
+	    background: #0d6efd;
+	    color: white;
+	}
 
         .meta {
             font-size: 0.8rem;
@@ -166,26 +175,23 @@ function pageUrl($page, $tag) {
     </div>
 
     <!-- GLOBAL TAG FILTER (horizontal scroll) -->
-    <div class="tag-row mb-3">
 
-        <a href="index.php"
-           class="tag-chip <?= !$tag ? 'active' : '' ?>">
-            All
-        </a>
+	<div class="tag-cloud">
 
-        <?php foreach ($tagCounts as $t): ?>
-            <?php
-                $name = $t['tag'];
-                $active = ($tag === $name);
-            ?>
-            <a href="?tag=<?= urlencode($name) ?>"
-               class="tag-chip <?= $active ? 'active' : '' ?>">
-                <?= htmlspecialchars($name) ?> (<?= $t['count'] ?>)
-            </a>
-        <?php endforeach; ?>
+	    <a href="index.php"
+	       class="tag-chip <?= !$tag ? 'active' : '' ?>">
+		All
+	    </a>
 
-    </div>
+	    <?php foreach ($tagCounts as $t): ?>
+		<a href="?tag=<?= urlencode($t['tag']) ?>"
+		   class="tag-chip <?= ($tag === $t['tag']) ? 'active' : '' ?>"
+		   style="font-size: <?= tagSize($t['count'], $min, $max) ?>rem;">
+		    <?= htmlspecialchars($t['tag']) ?> (<?= $t['count'] ?>)
+		</a>
+	    <?php endforeach; ?>
 
+	</div>
     <!-- FEED -->
     <?php foreach ($items as $item): ?>
 
