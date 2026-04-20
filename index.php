@@ -155,7 +155,7 @@ function pageUrl($page, $tag) {
 
     <!-- HEADER -->
     <div class="d-flex justify-content-between align-items-center mb-2">
-        <h4 class="mb-0">Reviews Feed</h4>
+        <h4 class="mb-0">Reviews</h4>
 
         <div class="d-flex gap-2">
             <a href="add.php" class="btn btn-primary btn-sm">+ Add</a>
