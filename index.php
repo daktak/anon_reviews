@@ -158,7 +158,7 @@ function pageUrl($page, $tag) {
         <h4 class="mb-0">Reviews</h4>
 
         <div class="d-flex gap-2">
-            <a href="add.php" class="btn btn-primary btn-sm">+ Add</a>
+            <a href="item_form.php" class="btn btn-primary btn-sm">+ Add</a>
             <?php if ($isAdmin): ?>
                 <a href="logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
             <?php endif; ?>
@@ -201,7 +201,7 @@ function pageUrl($page, $tag) {
                     </a>
 
                     <?php if ($isAdmin): ?>
-                            <a href="edit.php?id=<?= $item['id'] ?>"
+                            <a href="item_form.php?id=<?= $item['id'] ?>"
                                class="btn btn-sm btn-warning">
                                 Edit
                             </a>
