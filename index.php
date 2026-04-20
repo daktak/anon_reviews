@@ -4,6 +4,7 @@ require 'config.php';
 $isAdmin = $_SESSION['is_admin'] ?? false;
 
 $tag  = $_GET['tag']  ?? null;
+$search = $_GET['search'] ?? null;
 $page = max(1, (int)($_GET['page'] ?? 1));
 $perPage = 10;
 $offset = ($page - 1) * $perPage;
@@ -13,14 +14,20 @@ $offset = ($page - 1) * $perPage;
 | FILTER
 |--------------------------------------------------------------------------
 */
-$where = '';
+$whereParts = [];
 $params = [];
 
 if ($tag) {
-    $where = "WHERE tags ILIKE :tag";
+    $whereParts[] = "tags ILIKE :tag";
     $params[':tag'] = '%' . $tag . '%';
 }
 
+if ($search) {
+    $whereParts[] = "(title ILIKE :search OR review ILIKE :search)";
+    $params[':search'] = '%' . $search . '%';
+}
+
+$where = $whereParts ? "WHERE " . implode(" AND ", $whereParts) : "";
 /*
 |--------------------------------------------------------------------------
 | COUNT
@@ -82,8 +89,10 @@ $counts = array_column($tagCounts, 'count');
 $min = $counts ? min($counts) : 0;
 $max = $counts ? max($counts) : 1;
 
-function pageUrl($page, $tag) {
-    return '?page=' . $page . ($tag ? '&tag=' . urlencode($tag) : '');
+function pageUrl($page, $tag, $search) {
+    return '?page=' . $page
+        . ($tag ? '&tag=' . urlencode($tag) : '')
+        . ($search ? '&search=' . urlencode($search) : '');
 }
 ?>
 
@@ -174,6 +183,31 @@ function pageUrl($page, $tag) {
         </div>
     </div>
 
+	<form method="GET" class="mb-3">
+
+	    <div class="input-group">
+
+		<input type="text"
+		       name="search"
+		       class="form-control"
+		       placeholder="Search title or review..."
+		       value="<?= htmlspecialchars($search ?? '') ?>">
+
+		<?php if ($tag): ?>
+		    <input type="hidden" name="tag" value="<?= htmlspecialchars($tag) ?>">
+		<?php endif; ?>
+
+		<button class="btn btn-primary">Search</button>
+
+		<?php if ($search || $tag): ?>
+		    <a href="index.php" class="btn btn-outline-secondary">
+			Reset
+		    </a>
+		<?php endif; ?>
+
+	    </div>
+
+	</form>
     <!-- GLOBAL TAG FILTER (horizontal scroll) -->
 
 	<div class="tag-cloud">
@@ -273,32 +307,32 @@ function pageUrl($page, $tag) {
 
     <?php endforeach; ?>
 
-    <!-- PAGINATION -->
-    <div class="d-flex justify-content-between mt-3">
+<!-- PAGINATION -->
+<div class="d-flex justify-content-between mt-3">
 
-        <?php if ($page > 1): ?>
-            <a class="btn btn-outline-secondary"
-               href="<?= pageUrl($page - 1, $tag) ?>">
-                ← Prev
-            </a>
-        <?php else: ?>
-            <div></div>
-        <?php endif; ?>
+    <?php if ($page > 1): ?>
+        <a class="btn btn-outline-secondary"
+           href="<?= pageUrl($page - 1, $tag, $search ?? null) ?>">
+            ← Prev
+        </a>
+    <?php else: ?>
+        <div></div>
+    <?php endif; ?>
 
-        <div class="align-self-center text-muted">
-            Page <?= $page ?> / <?= $totalPages ?>
-        </div>
-
-        <?php if ($page < $totalPages): ?>
-            <a class="btn btn-outline-secondary"
-               href="<?= pageUrl($page + 1, $tag) ?>">
-                Next →
-            </a>
-        <?php else: ?>
-            <div></div>
-        <?php endif; ?>
-
+    <div class="align-self-center text-muted">
+        Page <?= $page ?> / <?= $totalPages ?>
     </div>
+
+    <?php if ($page < $totalPages): ?>
+        <a class="btn btn-outline-secondary"
+           href="<?= pageUrl($page + 1, $tag, $search ?? null) ?>">
+            Next →
+        </a>
+    <?php else: ?>
+        <div></div>
+    <?php endif; ?>
+
+</div>
 
     <!-- FOOTER -->
     <div class="text-center mt-4 mb-2">
