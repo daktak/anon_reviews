@@ -132,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         id="tagsInput"
                         class="form-control"
                         list="tagSuggestions"
-                        placeholder="e.g. php, docker, monitoring"
+                        placeholder="e.g. hrm, shoes, clothes"
                     >
 
                     <datalist id="tagSuggestions">
