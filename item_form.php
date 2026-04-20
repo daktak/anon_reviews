@@ -13,6 +13,13 @@ $isAdmin = $_SESSION['is_admin'] ?? false;
 $id = $_GET['id'] ?? null;
 $isEdit = $id && is_numeric($id);
 
+$tagStmt = $pdo->query("
+    SELECT DISTINCT trim(unnest(string_to_array(tags, ','))) AS tag
+    FROM reviews.items
+    WHERE tags IS NOT NULL
+");
+
+$existingTags = array_filter($tagStmt->fetchAll(PDO::FETCH_COLUMN));
 /*
 |--------------------------------------------------------------------------
 | LOAD ITEM (EDIT MODE ONLY)
@@ -207,11 +214,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 		</div>
 
-                <input type="text"
-                       name="tags"
-                       class="form-control mb-3"
-                       placeholder="Tags (comma separated)"
-                       value="<?= htmlspecialchars($item['tags']) ?>">
+		<label class="form-label">Tags</label>
+
+		<input list="tag-suggestions"
+		       name="tags"
+		       class="form-control mb-3"
+		       placeholder="Type or select tags (comma separated)"
+		       value="<?= htmlspecialchars($item['tags']) ?>">
+
+		<datalist id="tag-suggestions">
+		    <?php foreach ($existingTags as $t): ?>
+			<?php if ($t): ?>
+			    <option value="<?= htmlspecialchars($t) ?>"></option>
+			<?php endif; ?>
+		    <?php endforeach; ?>
+		</datalist>
 
                 <button class="btn btn-primary w-100">
                     <?= $isEdit ? 'Update (Admin)' : 'Create Item' ?>
