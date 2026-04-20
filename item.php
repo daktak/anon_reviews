@@ -148,31 +148,7 @@ function pageUrl($id, $page, $sort) {
 <head>
     <title><?= htmlspecialchars($item['title']) ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-<style>
-.star-rating {
-    font-size: 2rem;
-    user-select: none;
-    display: inline-block;
-}
-
-.star {
-    color: #ccc;
-    cursor: pointer;
-    position: relative;
-}
-
-.star.full {
-    color: #f5b301;
-}
-
-.star.half::before {
-    content: "★";
-    color: #f5b301;
-    position: absolute;
-    width: 50%;
-    overflow: hidden;
-}
-</style>
+    <link rel="stylesheet" href="assets/rating.css">
 </head>
 
 <body class="bg-light">
@@ -316,9 +292,8 @@ function pageUrl($id, $page, $sort) {
 		<div class="mb-3">
 		    <label class="form-label">Rating</label>
 
-		    <input type="hidden" name="rating" id="rating" value="0">
-
 		    <div class="star-rating">
+		        <input type="hidden" name="rating" id="rating" value="0">
 			<span class="star" data-value="1">★</span>
 			<span class="star" data-value="2">★</span>
 			<span class="star" data-value="3">★</span>
@@ -336,53 +311,6 @@ function pageUrl($id, $page, $sort) {
 
 </div>
 
-<script>
-const stars = document.querySelectorAll('.star');
-const ratingInput = document.getElementById('rating');
-
-let rating = 0;
-
-stars.forEach(star => {
-
-    star.addEventListener('mousemove', (e) => {
-        const rect = star.getBoundingClientRect();
-        const isHalf = (e.clientX - rect.left) < rect.width / 2;
-
-        const value = parseInt(star.dataset.value);
-        const newRating = isHalf ? value - 0.5 : value;
-
-        highlightStars(newRating);
-    });
-
-    star.addEventListener('click', (e) => {
-        const rect = star.getBoundingClientRect();
-        const isHalf = (e.clientX - rect.left) < rect.width / 2;
-
-        const value = parseInt(star.dataset.value);
-        rating = isHalf ? value - 0.5 : value;
-
-        ratingInput.value = rating;
-        highlightStars(rating);
-    });
-
-    star.addEventListener('mouseleave', () => {
-        highlightStars(rating);
-    });
-});
-
-function highlightStars(value) {
-    stars.forEach(star => {
-        const starValue = parseInt(star.dataset.value);
-
-        star.classList.remove('full', 'half');
-
-        if (value >= starValue) {
-            star.classList.add('full');
-        } else if (value >= starValue - 0.5) {
-            star.classList.add('half');
-        }
-    });
-}
-</script>
+<script src="assets/rating.js"></script>
 </body>
 </html>

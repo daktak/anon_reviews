@@ -1,0 +1,24 @@
+.star-rating {
+    font-size: 2rem;
+    user-select: none;
+    display: inline-block;
+}
+
+.star {
+    color: #ccc;
+    cursor: pointer;
+    position: relative;
+    display: inline-block;
+}
+
+.star.full {
+    color: #f5b301;
+}
+
+.star.half::before {
+    content: "★";
+    color: #f5b301;
+    position: absolute;
+    width: 50%;
+    overflow: hidden;
+}

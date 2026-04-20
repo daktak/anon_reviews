@@ -76,6 +76,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <title>Add Review</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/rating.css">
 </head>
 
 <body class="bg-light">
@@ -117,10 +118,19 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <!-- Rating -->
-                <div class="mb-3">
-                    <label class="form-label">Rating (0–5)</label>
-                    <input type="number" name="rating" class="form-control" step="0.1" min="0" max="5">
-                </div>
+		<div class="mb-3">
+		    <label class="form-label">Rating</label>
+
+		    <div class="star-rating">
+			<input type="hidden" name="rating" value="0">
+
+			<span class="star" data-value="1">★</span>
+			<span class="star" data-value="2">★</span>
+			<span class="star" data-value="3">★</span>
+			<span class="star" data-value="4">★</span>
+			<span class="star" data-value="5">★</span>
+		    </div>
+		</div>
 
                 <!-- Tags with autocomplete -->
                 <div class="mb-3">
@@ -185,6 +195,8 @@ input.addEventListener('change', function () {
     }
 });
 </script>
+
+<script src="assets/rating.js"></script>
 
 </body>
 </html>
