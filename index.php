@@ -190,6 +190,14 @@ function pageUrl($page, $tag) {
                                 </a>
                             </h5>
 
+<?php if (!empty($item['link'])): ?>
+    <a href="<?= htmlspecialchars($item['link']) ?>"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="btn btn-sm btn-outline-primary ms-2">
+        View Link
+    </a>
+<?php endif; ?>
                             <?php if ($isAdmin): ?>
                                 <a href="delete.php?id=<?= $item['id'] ?>"
                                    class="btn btn-sm btn-danger"

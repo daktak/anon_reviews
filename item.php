@@ -157,8 +157,18 @@ function pageUrl($id, $page, $sort) {
     <!-- Header -->
     <div class="d-flex justify-content-between align-items-center">
 
-        <h2><?= htmlspecialchars($item['title']) ?></h2>
+        <h2><?= htmlspecialchars($item['title']) ?>
 
+<?php if (!empty($item['link'])): ?>
+    <a href="<?= htmlspecialchars($item['link']) ?>"
+       target="_blank"
+       rel="noopener noreferrer"
+       class="btn btn-lg btn-outline-primary">
+        View Link
+    </a>
+<?php endif; ?>
+
+</h2>
         <div class="d-flex gap-2">
 
             <?php if ($isAdmin): ?>
@@ -166,6 +176,7 @@ function pageUrl($id, $page, $sort) {
                     Logout
                 </a>
             <?php endif; ?>
+
 
             <a href="index.php" class="btn btn-secondary btn-sm">
                 Back
