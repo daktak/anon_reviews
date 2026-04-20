@@ -199,6 +199,10 @@ function pageUrl($page, $tag) {
     </a>
 <?php endif; ?>
                             <?php if ($isAdmin): ?>
+				    <a href="edit.php?id=<?= $item['id'] ?>"
+				       class="btn btn-sm btn-warning ms-1">
+					Edit
+				    </a>
                                 <a href="delete.php?id=<?= $item['id'] ?>"
                                    class="btn btn-sm btn-danger"
                                    onclick="return confirm('Delete this item?')">
