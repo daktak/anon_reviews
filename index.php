@@ -10,7 +10,7 @@ $offset = ($page - 1) * $perPage;
 
 /*
 |--------------------------------------------------------------------------
-| Filter
+| FILTER
 |--------------------------------------------------------------------------
 */
 $where = '';
@@ -23,7 +23,7 @@ if ($tag) {
 
 /*
 |--------------------------------------------------------------------------
-| Count
+| COUNT
 |--------------------------------------------------------------------------
 */
 $countStmt = $pdo->prepare("
@@ -35,7 +35,7 @@ $totalPages = max(1, ceil($totalItems / $perPage));
 
 /*
 |--------------------------------------------------------------------------
-| Items
+| ITEMS
 |--------------------------------------------------------------------------
 */
 $stmt = $pdo->prepare("
@@ -57,7 +57,7 @@ $items = $stmt->fetchAll();
 
 /*
 |--------------------------------------------------------------------------
-| Tags (cloud)
+| TAG CLOUD (top bar)
 |--------------------------------------------------------------------------
 */
 $tagStmt = $pdo->query("
@@ -73,14 +73,14 @@ $tagStmt = $pdo->query("
 
 $tagCounts = $tagStmt->fetchAll();
 
+function tagSize($c, $min, $max) {
+    if ($max == $min) return 1.0;
+    return 0.9 + (($c - $min) / ($max - $min)) * 0.8;
+}
+
 $counts = array_column($tagCounts, 'count');
 $min = $counts ? min($counts) : 0;
 $max = $counts ? max($counts) : 1;
-
-function tagSize($c, $min, $max) {
-    if ($max == $min) return 1.2;
-    return 1 + (($c - $min) / ($max - $min)) * 1.5;
-}
 
 function pageUrl($page, $tag) {
     return '?page=' . $page . ($tag ? '&tag=' . urlencode($tag) : '');
@@ -90,204 +90,220 @@ function pageUrl($page, $tag) {
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Reviews</title>
+    <title>Reviews Feed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f6f8;
+        }
+
+        .feed-card {
+            border: 0;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .tag-row {
+            overflow-x: auto;
+            white-space: nowrap;
+        }
+
+        .tag-chip {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            background: #e9ecef;
+            margin-right: 6px;
+            font-size: 0.85rem;
+            text-decoration: none;
+            color: #333;
+        }
+
+        .tag-chip.active {
+            background: #0d6efd;
+            color: #fff;
+        }
+
+        .meta {
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .rating {
+            color: #f5b301;
+            font-size: 1rem;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .container {
+            max-width: 720px;
+        }
+    </style>
 </head>
 
-<body class="bg-light">
+<body>
 
-<div class="container py-4">
+<div class="container py-3">
 
-    <!-- Header -->
-    <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1 class="h3 mb-0">Reviews</h1>
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <h4 class="mb-0">Reviews Feed</h4>
 
-        <div>
-            <a href="add.php" class="btn btn-primary">+ Add</a>
-
+        <div class="d-flex gap-2">
+            <a href="add.php" class="btn btn-primary btn-sm">+ Add</a>
             <?php if ($isAdmin): ?>
-                <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+                <a href="logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
             <?php endif; ?>
         </div>
     </div>
 
-    <div class="row">
+    <!-- GLOBAL TAG FILTER (horizontal scroll) -->
+    <div class="tag-row mb-3">
 
-        <!-- Tags -->
-        <div class="col-md-3">
+        <a href="index.php"
+           class="tag-chip <?= !$tag ? 'active' : '' ?>">
+            All
+        </a>
 
-            <div class="card mb-3">
-                <div class="card-body">
+        <?php foreach ($tagCounts as $t): ?>
+            <?php
+                $name = $t['tag'];
+                $active = ($tag === $name);
+            ?>
+            <a href="?tag=<?= urlencode($name) ?>"
+               class="tag-chip <?= $active ? 'active' : '' ?>">
+                <?= htmlspecialchars($name) ?> (<?= $t['count'] ?>)
+            </a>
+        <?php endforeach; ?>
 
-                    <strong class="d-block mb-2">Tags</strong>
-
-                    <?php if ($tag): ?>
-                        <a href="index.php" class="btn btn-sm btn-danger mb-2">Reset</a>
-                    <?php endif; ?>
-
-                    <div>
-                        <?php foreach ($tagCounts as $t):
-                            $size = tagSize($t['count'], $min, $max);
-                        ?>
-                            <a href="?tag=<?= urlencode($t['tag']) ?>"
-                               style="font-size: <?= $size ?>rem"
-                               class="text-decoration-none me-2 d-inline-block">
-                                <?= htmlspecialchars($t['tag']) ?>
-                            </a>
-                        <?php endforeach; ?>
-                    </div>
-
-                </div>
-            </div>
-
-        </div>
-
-        <!-- Items -->
-        <div class="col-md-9">
-
-            <!-- Pagination top -->
-<?php if ($totalPages > 1): ?>
-    <nav class="mb-3">
-        <ul class="pagination">
-
-            <!-- Previous -->
-            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                <a class="page-link" href="<?= pageUrl($page - 1, $tag) ?>">
-                    Previous
-                </a>
-            </li>
-
-            <!-- Page numbers -->
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                    <a class="page-link" href="<?= pageUrl($i, $tag) ?>">
-                        <?= $i ?>
-                    </a>
-                </li>
-            <?php endfor; ?>
-
-            <!-- Next -->
-            <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                <a class="page-link" href="<?= pageUrl($page + 1, $tag) ?>">
-                    Next
-                </a>
-            </li>
-
-        </ul>
-    </nav>
-<?php endif; ?>
-
-            <?php foreach ($items as $item): ?>
-
-                <div class="card mb-3">
-                    <div class="card-body">
-
-                        <div class="d-flex justify-content-between align-items-start">
-
-                            <h5 class="mb-1">
-                                <a href="item.php?id=<?= $item['id'] ?>">
-                                    <?= htmlspecialchars($item['title']) ?>
-                                </a>
-                            </h5>
-
-<?php if (!empty($item['link'])): ?>
-    <a href="<?= htmlspecialchars($item['link']) ?>"
-       target="_blank"
-       rel="noopener noreferrer"
-       class="btn btn-sm btn-outline-primary ms-2">
-        View Link
-    </a>
-<?php endif; ?>
-                            <?php if ($isAdmin): ?>
-				    <a href="edit.php?id=<?= $item['id'] ?>"
-				       class="btn btn-sm btn-warning ms-1">
-					Edit
-				    </a>
-                                <a href="delete.php?id=<?= $item['id'] ?>"
-                                   class="btn btn-sm btn-danger"
-                                   onclick="return confirm('Delete this item?')">
-                                    Delete
-                                </a>
-                            <?php endif; ?>
-
-                        </div>
-
-                        <small class="text-muted d-block mb-2">
-                            <?= htmlspecialchars($item['date_added']) ?>
-                        </small>
-
-                        <p><?= nl2br(htmlspecialchars($item['review'])) ?></p>
-
-                        <span class="badge bg-secondary">
-                            Rating: <?= $item['rating'] ? round($item['rating'], 2) : 'N/A' ?>/5
-                        </span>
-
-                        <?php if (!empty($item['tags'])): ?>
-                            <div class="mt-2">
-                                <?php foreach (explode(',', $item['tags']) as $t): ?>
-                                    <?php $t = trim($t); ?>
-                                    <a href="?tag=<?= urlencode($t) ?>"
-                                       class="badge bg-primary text-decoration-none me-1">
-                                        <?= htmlspecialchars($t) ?>
-                                    </a>
-                                <?php endforeach; ?>
-                            </div>
-                        <?php endif; ?>
-
-                    </div>
-                </div>
-
-            <?php endforeach; ?>
-
-<!-- Pagination bottom -->
-<?php if ($totalPages > 1): ?>
-    <nav class="mb-3">
-        <ul class="pagination">
-
-            <!-- Previous -->
-            <li class="page-item <?= $page <= 1 ? 'disabled' : '' ?>">
-                <a class="page-link" href="<?= pageUrl($page - 1, $tag) ?>">
-                    Previous
-                </a>
-            </li>
-
-            <!-- Page numbers -->
-            <?php for ($i = 1; $i <= $totalPages; $i++): ?>
-                <li class="page-item <?= $i == $page ? 'active' : '' ?>">
-                    <a class="page-link" href="<?= pageUrl($i, $tag) ?>">
-                        <?= $i ?>
-                    </a>
-                </li>
-            <?php endfor; ?>
-
-            <!-- Next -->
-            <li class="page-item <?= $page >= $totalPages ? 'disabled' : '' ?>">
-                <a class="page-link" href="<?= pageUrl($page + 1, $tag) ?>">
-                    Next
-                </a>
-            </li>
-
-        </ul>
-    </nav>
-<?php endif; ?>
-
-        </div>
     </div>
 
-</div>
-<!-- Footer notice -->
-<div class="text-center mt-5 mb-3">
-    <small class="text-muted">
-        Source code available at 
-        <a href="https://github.com/daktak/anon_reviews" target="_blank" rel="noopener">
-            https://github.com/daktak/anon_reviews
-        </a>
-        — licensed under GPL v3.
-        &nbsp;|&nbsp;
-        <a href="https://github.com/daktak/anon_reviews/issues" target="_blank" rel="noopener">
-            Report an issue
-        </a>
-    </small>
+    <!-- FEED -->
+    <?php foreach ($items as $item): ?>
+
+        <div class="card feed-card shadow-sm">
+
+            <div class="card-body">
+
+                <!-- TITLE -->
+                <div class="d-flex justify-content-between align-items-start">
+                    <a href="item.php?id=<?= $item['id'] ?>"
+                       class="text-decoration-none fw-bold">
+                        <?= htmlspecialchars($item['title']) ?>
+                    </a>
+
+                    <?php if ($isAdmin): ?>
+                        <a href="delete.php?id=<?= $item['id'] ?>"
+                           class="btn btn-sm btn-outline-danger"
+                           onclick="return confirm('Delete item?')">
+                            Del
+                        </a>
+                    <?php endif; ?>
+                </div>
+
+                <!-- META -->
+                <div class="meta mt-1">
+                    <?= htmlspecialchars($item['date_added']) ?>
+                </div>
+
+                <!-- REVIEW -->
+                <p class="mt-2 mb-2">
+                    <?= nl2br(htmlspecialchars($item['review'])) ?>
+                </p>
+
+                <!-- RATING -->
+                <div class="rating mb-2">
+                    <?= str_repeat("★", floor($item['rating'])) ?>
+                    <?= $item['rating'] - floor($item['rating']) >= 0.5 ? "½" : "" ?>
+                    <?= str_repeat("☆", 5 - ceil($item['rating'])) ?>
+                    <span class="text-muted ms-1">
+                        (<?= $item['rating'] ? round($item['rating'], 1) : 'N/A' ?>)
+                    </span>
+                </div>
+
+                <!-- TAGS -->
+                <div class="mb-2">
+                    <?php foreach (explode(',', $item['tags']) as $t): ?>
+                        <?php $t = trim($t); ?>
+                        <?php if ($t): ?>
+                            <a href="?tag=<?= urlencode($t) ?>"
+                               class="tag-chip">
+                                <?= htmlspecialchars($t) ?>
+                            </a>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </div>
+
+                <!-- ACTIONS -->
+                <div class="action-row">
+                    <?php if (!empty($item['link'])): ?>
+                        <a href="<?= htmlspecialchars($item['link']) ?>"
+                           target="_blank"
+                           class="btn btn-sm btn-outline-primary">
+                            Link
+                        </a>
+                    <?php endif; ?>
+
+                    <a href="item.php?id=<?= $item['id'] ?>"
+                       class="btn btn-sm btn-outline-secondary">
+                        Comments
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    <?php endforeach; ?>
+
+    <!-- PAGINATION -->
+    <div class="d-flex justify-content-between mt-3">
+
+        <?php if ($page > 1): ?>
+            <a class="btn btn-outline-secondary"
+               href="<?= pageUrl($page - 1, $tag) ?>">
+                ← Prev
+            </a>
+        <?php else: ?>
+            <div></div>
+        <?php endif; ?>
+
+        <div class="align-self-center text-muted">
+            Page <?= $page ?> / <?= $totalPages ?>
+        </div>
+
+        <?php if ($page < $totalPages): ?>
+            <a class="btn btn-outline-secondary"
+               href="<?= pageUrl($page + 1, $tag) ?>">
+                Next →
+            </a>
+        <?php else: ?>
+            <div></div>
+        <?php endif; ?>
+
+    </div>
+
+    <!-- FOOTER -->
+    <div class="text-center mt-4 mb-2">
+        <small class="text-muted">
+            Source:
+            <a href="https://github.com/daktak/anon_reviews" target="_blank">
+                GPLv3 on GitHub
+            </a>
+            |
+            <a href="https://github.com/daktak/anon_reviews/issues" target="_blank">
+                Report issue
+            </a>
+        </small>
+    </div>
+
 </div>
 
 </body>
