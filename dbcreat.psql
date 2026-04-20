@@ -27,7 +27,7 @@ CREATE TABLE reviews.comments (
     date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     username TEXT NOT NULL,
     comment TEXT NOT NULL,
-    rating INTEGER,
+    rating NUMERIC(3,2),
 
     -- Foreign key to items table
     CONSTRAINT fk_review_item
