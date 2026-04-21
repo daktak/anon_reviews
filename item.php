@@ -198,6 +198,17 @@ function pageUrl($page, $sort, $id) {
 
             <p><?= nl2br(htmlspecialchars($item['review'])) ?></p>
 
+                <!-- ACTIONS -->
+                <div class="action-row">
+                    <?php if (!empty($item['link'])): ?>
+                        <a href="<?= htmlspecialchars($item['link']) ?>"
+                           target="_blank"
+                           class="btn btn-sm btn-outline-primary">
+                            Link
+                        </a>
+                    <?php endif; ?>
+                </div>
+
             <div class="rating mb-2">
                 <?= str_repeat("★", floor($item['rating'])) ?>
                 <?= ($item['rating'] - floor($item['rating']) >= 0.5) ? "½" : "" ?>
