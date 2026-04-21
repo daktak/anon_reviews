@@ -46,7 +46,7 @@ $totalPages = max(1, ceil($totalItems / $perPage));
 |--------------------------------------------------------------------------
 */
 $stmt = $pdo->prepare("
-    SELECT id, date_added, title, link, review, initial_rating, tags
+    SELECT id, date_added, title, link, review, initial_rating, tags, username
     FROM reviews.items
     $where
     ORDER BY date_added DESC
@@ -255,6 +255,9 @@ function pageUrl($page, $tag, $search) {
 
                 <!-- META -->
                 <div class="meta mt-1">
+                    <?= htmlspecialchars($item['username']) ?>
+                <div class="meta mt-1">
+                </div>
                     <?= htmlspecialchars($item['date_added']) ?>
                 </div>
 

@@ -14,6 +14,7 @@ CREATE SCHEMA reviews AUTHORIZATION reviews_user;
 CREATE TABLE reviews.items (
     id SERIAL PRIMARY KEY,
     date_added TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    username TEXT NOT NULL,
     title TEXT NOT NULL,
     link TEXT,
     review TEXT,

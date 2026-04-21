@@ -27,6 +27,7 @@ $existingTags = array_filter($tagStmt->fetchAll(PDO::FETCH_COLUMN));
 */
 $item = [
     'title' => '',
+    'username' => '',
     'link' => '',
     'review' => '',
     'initial_rating' => '',
@@ -42,7 +43,7 @@ if ($isEdit) {
     }
 
     $stmt = $pdo->prepare("
-        SELECT id, title, link, review, initial_rating, tags
+        SELECT id, username, title, link, review, initial_rating, tags
         FROM reviews.items
         WHERE id = :id
     ");
@@ -63,6 +64,7 @@ if ($isEdit) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $title  = $_POST['title'] ?? '';
+    $username = $_POST['username'] ?? '';
     $link   = $_POST['link'] ?? '';
     $review = $_POST['review'] ?? '';
     $rating = $_POST['rating'] ?? null;
@@ -88,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $pdo->prepare("
             UPDATE reviews.items
             SET title = :title,
+	        username = :username,
                 link = :link,
                 review = :review,
                 initial_rating = :initial_rating,
@@ -97,6 +100,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         $stmt->execute([
             ':title' => $title,
+            ':username' => $username,
             ':link' => $link,
             ':review' => $review,
             ':initial_rating' => ($rating !== '' ? (float)$rating : null),
@@ -112,12 +116,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
 
         $stmt = $pdo->prepare("
-            INSERT INTO reviews.items (title, link, review, initial_rating, tags)
-            VALUES (:title, :link, :review, :initial_rating, :tags)
+            INSERT INTO reviews.items (username, title, link, review, initial_rating, tags)
+            VALUES (:username, :title, :link, :review, :initial_rating, :tags)
         ");
 
         $stmt->execute([
             ':title' => $title,
+            ':username' => $username,
             ':link' => $link,
             ':review' => $review,
             ':initial_rating' => ($rating !== '' ? (float)$rating : null),
@@ -185,6 +190,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                        placeholder="Title"
                        value="<?= htmlspecialchars($item['title']) ?>"
                        required>
+
+                <input type="text"
+                       name="username"
+                       class="form-control mb-2"
+                       placeholder="anon"
+                       value="<?= htmlspecialchars($item['username']) ?>">
 
                 <input type="text"
                        name="link"
