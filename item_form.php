@@ -29,7 +29,7 @@ $item = [
     'title' => '',
     'link' => '',
     'review' => '',
-    'rating' => '',
+    'initial_rating' => '',
     'tags' => ''
 ];
 
@@ -42,7 +42,7 @@ if ($isEdit) {
     }
 
     $stmt = $pdo->prepare("
-        SELECT id, title, link, review, rating, tags
+        SELECT id, title, link, review, initial_rating, tags
         FROM reviews.items
         WHERE id = :id
     ");
@@ -66,6 +66,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $link   = $_POST['link'] ?? '';
     $review = $_POST['review'] ?? '';
     $rating = $_POST['rating'] ?? null;
+    $initial_rating = $_POST['initial_rating'] ?? null;
     $tags   = $_POST['tags'] ?? '';
 
     if (!$title || !$review) {
@@ -89,7 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             SET title = :title,
                 link = :link,
                 review = :review,
-                rating = :rating,
+                initial_rating = :initial_rating,
                 tags = :tags
             WHERE id = :id
         ");
@@ -98,7 +99,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':title' => $title,
             ':link' => $link,
             ':review' => $review,
-            ':rating' => ($rating !== '' ? (float)$rating : null),
+            ':initial_rating' => ($rating !== '' ? (float)$rating : null),
             ':tags' => $tags,
             ':id' => $id
         ]);
@@ -111,15 +112,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
 
         $stmt = $pdo->prepare("
-            INSERT INTO reviews.items (title, link, review, rating, tags)
-            VALUES (:title, :link, :review, :rating, :tags)
+            INSERT INTO reviews.items (title, link, review, initial_rating, tags)
+            VALUES (:title, :link, :review, :initial_rating, :tags)
         ");
 
         $stmt->execute([
             ':title' => $title,
             ':link' => $link,
             ':review' => $review,
-            ':rating' => ($rating !== '' ? (float)$rating : null),
+            ':initial_rating' => ($rating !== '' ? (float)$rating : null),
             ':tags' => $tags
         ]);
     }
@@ -202,8 +203,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 		    <label class="form-label">Rating</label>
 
-		    <div class="star-rating" data-value="<?= htmlspecialchars($item['rating'] ?? 0) ?>">
-			<input type="hidden" name="rating" value="<?= htmlspecialchars($item['rating'] ?? 0) ?>">
+		    <div class="star-rating" data-value="<?= htmlspecialchars($item['initial_rating'] ?? 0) ?>">
+			<input type="hidden" name="rating" value="<?= htmlspecialchars($item['initial_rating'] ?? 0) ?>">
 
 			<span class="star" data-value="1">★</span>
 			<span class="star" data-value="2">★</span>

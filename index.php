@@ -46,7 +46,7 @@ $totalPages = max(1, ceil($totalItems / $perPage));
 |--------------------------------------------------------------------------
 */
 $stmt = $pdo->prepare("
-    SELECT id, date_added, title, link, review, rating, tags
+    SELECT id, date_added, title, link, review, initial_rating, tags
     FROM reviews.items
     $where
     ORDER BY date_added DESC
@@ -265,11 +265,11 @@ function pageUrl($page, $tag, $search) {
 
                 <!-- RATING -->
                 <div class="rating mb-2">
-                    <?= str_repeat("★", floor($item['rating'])) ?>
-                    <?= $item['rating'] - floor($item['rating']) >= 0.5 ? "½" : "" ?>
-                    <?= str_repeat("☆", 5 - ceil($item['rating'])) ?>
+                    <?= str_repeat("★", floor($item['initial_rating'])) ?>
+                    <?= $item['initial_rating'] - floor($item['initial_rating']) >= 0.5 ? "½" : "" ?>
+                    <?= str_repeat("☆", 5 - ceil($item['initial_rating'])) ?>
                     <span class="text-muted ms-1">
-                        (<?= $item['rating'] ? round($item['rating'], 1) : 'N/A' ?>)
+                        (<?= $item['initial_rating'] ? round($item['initial_rating'], 1) : 'N/A' ?>)
                     </span>
                 </div>
 
