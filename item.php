@@ -334,7 +334,7 @@ function pageUrl($page, $sort, $id) {
 
             <form method="POST">
 
-                <input type="text" name="username" class="form-control mb-2" placeholder="Name" required>
+                <input type="text" name="username" class="form-control mb-2" placeholder="anon" required>
 
                 <textarea name="comment" class="form-control mb-2" required></textarea>
 
