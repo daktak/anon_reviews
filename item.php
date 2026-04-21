@@ -25,7 +25,7 @@ $offset = ($page - 1) * $perPage;
 |--------------------------------------------------------------------------
 */
 $stmt = $pdo->prepare("
-    SELECT id, date_added, title, link, review, rating, tags
+    SELECT id, date_added, title, link, review, rating, tags, initial_rating
     FROM reviews.items
     WHERE id = :id
 ");
@@ -220,11 +220,11 @@ function pageUrl($page, $sort, $id) {
                 </div>
 
             <div class="rating mb-2">
-                <?= str_repeat("★", floor($item['rating'])) ?>
-                <?= ($item['rating'] - floor($item['rating']) >= 0.5) ? "½" : "" ?>
-                <?= str_repeat("☆", 5 - ceil($item['rating'])) ?>
+                <?= str_repeat("★", floor($item['initial_rating'])) ?>
+                <?= ($item['rating'] - floor($item['initial_rating']) >= 0.5) ? "½" : "" ?>
+                <?= str_repeat("☆", 5 - ceil($item['initial_rating'])) ?>
                 <span class="text-muted ms-1">
-                    <?= $item['rating'] ? round($item['rating'],1) : 'N/A' ?>/5
+                    <?= $item['initial_rating'] ? round($item['initial_rating'],1) : 'N/A' ?>/5
                 </span>
             </div>
 
