@@ -115,6 +115,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 function pageUrl($page, $sort, $id) {
     return "?id=$id&page=$page&sort=$sort";
 }
+function timeAgo($datetime) {
+    $time = time() - strtotime($datetime);
+
+    if ($time < 60) return 'just now';
+    if ($time < 3600) return floor($time/60) . ' min ago';
+    if ($time < 86400) return floor($time/3600) . ' hr ago';
+    if ($time < 604800) return floor($time/86400) . ' days ago';
+
+    return date('M j, Y', strtotime($datetime));
+}
 ?>
 
 <!DOCTYPE html>
@@ -203,7 +213,7 @@ function pageUrl($page, $sort, $id) {
 	    </h5>
 
             <div class="meta mb-2">
-                <?= htmlspecialchars($item['date_added']) ?>
+		<?= timeAgo($item['date_added']) ?>
             </div>
 
             <p><?= nl2br(htmlspecialchars($item['review'])) ?></p>

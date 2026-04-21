@@ -94,6 +94,16 @@ function pageUrl($page, $tag, $search) {
         . ($tag ? '&tag=' . urlencode($tag) : '')
         . ($search ? '&search=' . urlencode($search) : '');
 }
+function timeAgo($datetime) {
+    $time = time() - strtotime($datetime);
+
+    if ($time < 60) return 'just now';
+    if ($time < 3600) return floor($time/60) . ' min ago';
+    if ($time < 86400) return floor($time/3600) . ' hr ago';
+    if ($time < 604800) return floor($time/86400) . ' days ago';
+
+    return date('M j, Y', strtotime($datetime));
+}
 ?>
 
 <!DOCTYPE html>
@@ -258,7 +268,7 @@ function pageUrl($page, $tag, $search) {
                     <?= htmlspecialchars($item['username']) ?>
                 <div class="meta mt-1">
                 </div>
-                    <?= htmlspecialchars($item['date_added']) ?>
+		    <?= timeAgo($item['date_added']) ?>
                 </div>
 
                 <!-- REVIEW -->
