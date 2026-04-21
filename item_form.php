@@ -185,7 +185,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <form method="POST">
 
                 <input type="text"
+                       name="link"
+		       id="link"
+                       class="form-control mb-2"
+                       placeholder="Link (optional)"
+                       value="<?= htmlspecialchars($item['link']) ?>">
+
+                <small id="linkHint" class="text-muted d-block mb-2"></small>
+
+                <input type="text"
                        name="title"
+		       id="title"
                        class="form-control mb-2"
                        placeholder="Title"
                        value="<?= htmlspecialchars($item['title']) ?>"
@@ -197,11 +207,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                        placeholder="anon"
                        value="<?= htmlspecialchars($item['username']) ?>">
 
-                <input type="text"
-                       name="link"
-                       class="form-control mb-2"
-                       placeholder="Link (optional)"
-                       value="<?= htmlspecialchars($item['link']) ?>">
 
                 <textarea name="review"
                           class="form-control mb-2"
@@ -254,5 +259,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <script src="assets/rating.js"></script>
+<script src="assets/fetch_title.js"></script>
 </body>
 </html>
