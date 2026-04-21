@@ -190,7 +190,17 @@ function pageUrl($page, $sort, $id) {
 
         <div class="card-body">
 
-            <h5><?= htmlspecialchars($item['title']) ?></h5>
+            <h5>
+                    <?php if (!empty($item['link'])): ?>
+                        <a href="<?= htmlspecialchars($item['link']) ?>"
+                           target="_blank"
+			   class="text-decoration-none fw-bold">
+                    <?php endif; ?>
+	    <?= htmlspecialchars($item['title']) ?>
+                    <?php if (!empty($item['link'])): ?>
+                        </a>
+                    <?php endif; ?>
+	    </h5>
 
             <div class="meta mb-2">
                 <?= htmlspecialchars($item['date_added']) ?>
