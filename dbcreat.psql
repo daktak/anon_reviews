@@ -18,6 +18,7 @@ CREATE TABLE reviews.items (
     link TEXT,
     review TEXT,
     rating NUMERIC(3,2),
+    initial_rating NUMERIC(3,2),
     tags TEXT
 );
 
