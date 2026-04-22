@@ -39,12 +39,12 @@ CREATE TABLE reviews.comments (
         ON DELETE CASCADE,
 
     -- Rating constraint
-    CONSTRAINT rating_range CHECK (rating >= 1 AND rating <= 5)
+    CONSTRAINT rating_range CHECK (rating >= 0 AND rating <= 5)
 );
 
 -- 5. Optional: Add constraints
 ALTER TABLE reviews.items
-ADD CONSTRAINT rating_range CHECK (rating >= 1 AND rating <= 5);
+ADD CONSTRAINT rating_range CHECK (rating >= 0 AND rating <= 5);
 
 CREATE INDEX idx_comments_review_item
 ON reviews.comments(review_item);
