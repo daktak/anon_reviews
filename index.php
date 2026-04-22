@@ -113,68 +113,7 @@ function timeAgo($datetime) {
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-        body {
-            background: #f5f6f8;
-        }
-
-        .feed-card {
-            border: 0;
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        .tag-row {
-            overflow-x: auto;
-            white-space: nowrap;
-        }
-
-	.tag-cloud {
-	    display: flex;
-	    flex-wrap: wrap;
-	    gap: 6px 8px;
-	    max-height: 160px;     /* key reduction in scrolling */
-	    overflow-y: auto;      /* keeps it compact but scrollable if needed */
-	    padding: 6px;
-	}
-
-	.tag-chip {
-	    display: inline-block;
-	    padding: 4px 10px;
-	    border-radius: 999px;
-	    background: #e9ecef;
-	    text-decoration: none;
-	    color: #333;
-	    line-height: 1.2;
-	    white-space: nowrap;
-	}
-
-	.tag-chip.active {
-	    background: #0d6efd;
-	    color: white;
-	}
-
-        .meta {
-            font-size: 0.8rem;
-            color: #6c757d;
-        }
-
-        .rating {
-            color: #f5b301;
-            font-size: 1rem;
-        }
-
-        .action-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .container {
-            max-width: 720px;
-        }
-    </style>
+    <link href="assets/style.css" rel="stylesheet">
 </head>
 
 <body>

@@ -148,21 +148,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/rating.css" rel="stylesheet">
-
-    <style>
-        body { background:#f5f6f8; }
-        .container { max-width:720px; }
-
-        .card-feed {
-            border:0;
-            border-radius:12px;
-        }
-
-        .meta {
-            font-size:0.8rem;
-            color:#6c757d;
-        }
-    </style>
+    <link href="assets/style.css" rel="stylesheet">
 </head>
 
 <body>

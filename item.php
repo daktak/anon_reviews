@@ -135,39 +135,8 @@ function timeAgo($datetime) {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/rating.css" rel="stylesheet">
+    <link href="assets/style.css" rel="stylesheet">
 
-    <style>
-        body { background:#f5f6f8; }
-        .container { max-width:720px; }
-
-        .card-feed {
-            border:0;
-            border-radius:12px;
-            margin-bottom:12px;
-        }
-
-        .tag-chip {
-            display:inline-block;
-            padding:4px 10px;
-            border-radius:999px;
-            background:#e9ecef;
-            margin-right:6px;
-            font-size:0.85rem;
-        }
-
-        .meta {
-            font-size:0.8rem;
-            color:#6c757d;
-        }
-
-        .rating {
-            color:#f5b301;
-        }
-
-        .pagination-sm a {
-            font-size: 0.85rem;
-        }
-    </style>
 </head>
 
 <body>
