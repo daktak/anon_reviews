@@ -25,7 +25,7 @@ $offset = ($page - 1) * $perPage;
 |--------------------------------------------------------------------------
 */
 $stmt = $pdo->prepare("
-    SELECT id, date_added, title, link, review, rating, tags, initial_rating
+    SELECT id, date_added, title, link, review, rating, tags, initial_rating, emoji
     FROM reviews.items
     WHERE id = :id
 ");
@@ -187,6 +187,9 @@ function timeAgo($datetime) {
 
             <p><?= nl2br(htmlspecialchars($item['review'])) ?></p>
 
+                <div class="d-flex justify-content-between align-items-start">
+	        <!-- LEFT CONTENT -->
+	        <div class="flex-grow-1">
                 <!-- ACTIONS -->
                 <div class="action-row">
                     <?php if (!empty($item['link'])): ?>
@@ -214,6 +217,13 @@ function timeAgo($datetime) {
                     <?php endif; ?>
                 <?php endforeach; ?>
             </div>
+
+	    </div>
+		    <!-- RIGHT FLOATING EMOJI -->
+		    <div class="ms-3" style="font-size:42px; line-height:1;">
+			<?= htmlspecialchars($item['emoji'] ?? '') ?>
+		    </div>
+	    </div>
 
         </div>
     </div>
