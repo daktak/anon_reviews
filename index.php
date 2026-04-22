@@ -46,7 +46,7 @@ $totalPages = max(1, ceil($totalItems / $perPage));
 |--------------------------------------------------------------------------
 */
 $stmt = $pdo->prepare("
-    SELECT id, date_added, title, link, review, initial_rating, tags, username
+    SELECT id, date_added, title, link, review, initial_rating, tags, username, emoji
     FROM reviews.items
     $where
     ORDER BY date_added DESC
@@ -276,6 +276,10 @@ function timeAgo($datetime) {
                     <?= nl2br(htmlspecialchars($item['review'])) ?>
                 </p>
 
+                <div class="d-flex justify-content-between align-items-start">
+	        <!-- LEFT CONTENT -->
+	        <div class="flex-grow-1">
+
                 <!-- RATING -->
                 <div class="rating mb-2">
                     <?= str_repeat("★", floor($item['initial_rating'])) ?>
@@ -314,6 +318,12 @@ function timeAgo($datetime) {
                         Comments
                     </a>
                 </div>
+		</div>
+		    <!-- RIGHT FLOATING EMOJI -->
+		    <div class="ms-3" style="font-size:42px; line-height:1;">
+			<?= htmlspecialchars($item['emoji'] ?? '') ?>
+		    </div>
+		</div>
 
             </div>
         </div>

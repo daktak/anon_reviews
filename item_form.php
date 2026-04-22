@@ -31,7 +31,8 @@ $item = [
     'link' => '',
     'review' => '',
     'initial_rating' => '',
-    'tags' => ''
+    'tags' => '',
+    'emoji' => ''
 ];
 
 if ($isEdit) {
@@ -43,7 +44,7 @@ if ($isEdit) {
     }
 
     $stmt = $pdo->prepare("
-        SELECT id, username, title, link, review, initial_rating, tags
+        SELECT id, username, title, link, review, initial_rating, tags, emoji
         FROM reviews.items
         WHERE id = :id
     ");
@@ -70,6 +71,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $rating = $_POST['rating'] ?? null;
     $initial_rating = $_POST['initial_rating'] ?? null;
     $tags   = $_POST['tags'] ?? '';
+    $emoji  = $_POST['emoji'] ?? '';
 
     if (!$title || !$review) {
         die("Title and review required");
@@ -94,7 +96,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 link = :link,
                 review = :review,
                 initial_rating = :initial_rating,
-                tags = :tags
+                tags = :tags,
+		emoji = :emoji
             WHERE id = :id
         ");
 
@@ -105,6 +108,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':review' => $review,
             ':initial_rating' => ($rating !== '' ? (float)$rating : null),
             ':tags' => $tags,
+	    ':emoji' => $emoji,
             ':id' => $id
         ]);
 
@@ -116,8 +120,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
 
         $stmt = $pdo->prepare("
-            INSERT INTO reviews.items (username, title, link, review, initial_rating, tags)
-            VALUES (:username, :title, :link, :review, :initial_rating, :tags)
+            INSERT INTO reviews.items (username, title, link, review, initial_rating, tags, emoji)
+            VALUES (:username, :title, :link, :review, :initial_rating, :tags, :emoji)
         ");
 
         $stmt->execute([
@@ -126,7 +130,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':link' => $link,
             ':review' => $review,
             ':initial_rating' => ($rating !== '' ? (float)$rating : null),
-            ':tags' => $tags
+            ':tags' => $tags,
+	    ':emoji' => $emoji
         ]);
     }
 
@@ -214,6 +219,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                           placeholder="Review"
                           required><?= htmlspecialchars($item['review']) ?></textarea>
 
+		<label class="form-label">Tags</label>
+
+		<input list="tag-suggestions"
+		       name="tags"
+		       class="form-control mb-3"
+		       placeholder="Type or select tags (comma separated)"
+		       value="<?= htmlspecialchars($item['tags']) ?>">
+
+		<datalist id="tag-suggestions">
+		    <?php foreach ($existingTags as $t): ?>
+			<?php if ($t): ?>
+			    <option value="<?= htmlspecialchars($t) ?>"></option>
+			<?php endif; ?>
+		    <?php endforeach; ?>
+		</datalist>
+
 		<!-- RATING (HALF STAR UI) -->
 		<div class="mb-3">
 
@@ -231,21 +252,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 		</div>
 
-		<label class="form-label">Tags</label>
+		<label class="form-label">Emoji (optional)</label>
 
-		<input list="tag-suggestions"
-		       name="tags"
-		       class="form-control mb-3"
-		       placeholder="Type or select tags (comma separated)"
-		       value="<?= htmlspecialchars($item['tags']) ?>">
+		<input type="hidden" name="emoji" id="emoji" value="<?= htmlspecialchars($item['emoji']) ?>">
 
-		<datalist id="tag-suggestions">
-		    <?php foreach ($existingTags as $t): ?>
-			<?php if ($t): ?>
-			    <option value="<?= htmlspecialchars($t) ?>"></option>
-			<?php endif; ?>
-		    <?php endforeach; ?>
-		</datalist>
+		<div class="mb-2">
+		    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearEmoji()">
+			Clear
+		    </button>
+		</div>
+
+		<div class="mb-2" style="font-size:28px;" id="emojiDisplay">
+		    <?= htmlspecialchars($item['emoji']) ?: '—' ?>
+		</div>
+
+		<div class="mb-2">
+		    <button type="button" class="btn btn-light" onclick="setEmoji('👍')">👍</button>
+		    <button type="button" class="btn btn-light" onclick="setEmoji('👎')">👎</button>
+		</div>
+
+		<div id="emojiGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:4px;max-width:400px;"></div>
 
                 <button class="btn btn-primary w-100">
                     <?= $isEdit ? 'Update (Admin)' : 'Create Item' ?>
@@ -260,5 +286,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 <script src="assets/rating.js"></script>
 <script src="assets/fetch_title.js"></script>
+<script src="assets/emoji.js"></script>
 </body>
 </html>
