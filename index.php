@@ -178,7 +178,7 @@ function timeAgo($datetime) {
     <!-- FEED -->
     <?php foreach ($items as $item): ?>
 
-        <div class="card feed-card shadow-sm">
+        <div class="card card-feed shadow-sm">
 
             <div class="card-body">
 
