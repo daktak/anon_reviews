@@ -20,7 +20,8 @@ CREATE TABLE reviews.items (
     review TEXT,
     rating NUMERIC(3,2),
     initial_rating NUMERIC(3,2),
-    tags TEXT
+    tags TEXT,
+    emoji TEXT
 );
 
 CREATE TABLE reviews.comments (
