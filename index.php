@@ -194,7 +194,7 @@ function timeAgo($datetime) {
                                class="btn btn-sm btn-warning">
                                 Edit
                             </a>
-                        <a href="delete.php?id=<?= $item['id'] ?>"
+                        <a href="lib/delete.php?id=<?= $item['id'] ?>"
                            class="btn btn-sm btn-outline-danger"
                            onclick="return confirm('Delete item?')">
                             Del

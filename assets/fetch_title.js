@@ -16,7 +16,7 @@ linkInput.addEventListener('blur', async () => {
     hint.textContent = 'Fetching title...';
 
     try {
-        const res = await fetch('fetch_title.php?url=' + encodeURIComponent(url));
+        const res = await fetch('lib/fetch_title.php?url=' + encodeURIComponent(url));
         const data = await res.json();
 
         if (data.title) {

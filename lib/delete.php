@@ -1,5 +1,5 @@
 <?php
-require 'config.php';
+require '../config.php';
 session_start();
 
 /*
@@ -55,5 +55,5 @@ $stmt->execute([':id' => $item_id]);
 | REDIRECT
 |--------------------------------------------------------------------------
 */
-header("Location: index.php");
+header("Location: ../index.php");
 exit;

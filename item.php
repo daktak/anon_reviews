@@ -278,7 +278,7 @@ function timeAgo($datetime) {
                 </div>
 
                 <?php if ($isAdmin): ?>
-                    <a href="delete_comment.php?id=<?= $c['id'] ?>&item=<?= $id ?>"
+                    <a href="lib/delete_comment.php?id=<?= $c['id'] ?>&item=<?= $id ?>"
                        class="btn btn-sm btn-outline-danger mt-2">
                         Delete
                     </a>

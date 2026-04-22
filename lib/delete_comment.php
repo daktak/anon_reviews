@@ -1,5 +1,5 @@
 <?php
-require 'config.php';
+require '../config.php';
 session_start();
 
 /*
@@ -68,5 +68,5 @@ $stmt->execute([
 | REDIRECT BACK
 |--------------------------------------------------------------------------
 */
-header("Location: item.php?id=" . $item_id);
+header("Location: ../item.php?id=" . $item_id);
 exit;
