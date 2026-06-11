@@ -107,6 +107,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ':rating' => (float)$rating
         ]);
 
+        $stmt = $pdo->prepare("
+            UPDATE reviews.items
+            SET rating = (
+                SELECT AVG(rating)
+                FROM reviews.comments
+                WHERE review_item = :item
+            )
+            WHERE id = :item
+        ");
+        $stmt->execute([':item' => $id]);
+
         header("Location: item.php?id=$id");
         exit;
     }
