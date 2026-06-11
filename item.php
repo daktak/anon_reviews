@@ -201,14 +201,19 @@ function timeAgo($datetime) {
                     <?php endif; ?>
                 </div>
 
-            <div class="rating mb-2">
-                <?= str_repeat("★", floor($item['initial_rating'])) ?>
-                <?= ($item['rating'] - floor($item['initial_rating']) >= 0.5) ? "½" : "" ?>
-                <?= str_repeat("☆", 5 - ceil($item['initial_rating'])) ?>
-                <span class="text-muted ms-1">
-                    <?= $item['initial_rating'] ? round($item['initial_rating'],1) : 'N/A' ?>/5
-                </span>
+            <div class="mb-1">
+                <span class="rating">⭐</span>
+                <span class="fw-semibold"><?= $item['initial_rating'] ? round($item['initial_rating'],1) : 'N/A' ?>/5</span>
+                <span class="text-muted">— Reviewer</span>
             </div>
+
+            <?php if ($item['rating'] !== null): ?>
+            <div class="mb-1">
+                <span class="rating">💬</span>
+                <span class="fw-semibold"><?= round($item['rating'], 1) ?>/5</span>
+                <span class="text-muted">— Community (<?= $totalComments ?>)</span>
+            </div>
+            <?php endif; ?>
 
             <div>
                 <?php foreach (explode(',', $item['tags']) as $t): ?>
