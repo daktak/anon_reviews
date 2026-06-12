@@ -58,8 +58,10 @@ body {
   max-width: 720px;
 }
 
-[data-bs-theme="dark"] body {
-  background: #1a1d21;
+[data-bs-theme="dark"] {
+  --bs-body-bg: #121212;
+  --bs-body-color: #e0e0e0;
+  --bs-secondary-color: #a0a0a0;
 }
 
 [data-bs-theme="dark"] .tag-chip {
@@ -74,4 +76,9 @@ body {
 
 [data-bs-theme="dark"] .card-feed {
   background: #1e1f23;
+}
+
+[data-bs-theme="dark"] body {
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
 }
