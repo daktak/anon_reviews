@@ -141,7 +141,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 ?>
 
 <!DOCTYPE html>
-<html>
+<html data-bs-theme="<?= htmlspecialchars($_COOKIE['theme'] ?? 'light') ?>">
 <head>
     <title><?= $isEdit ? 'Edit Item' : 'Add Item' ?></title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -149,6 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/rating.css" rel="stylesheet">
     <link href="assets/style.css" rel="stylesheet">
+    <script src="assets/theme.js"></script>
 </head>
 
 <body>
@@ -277,6 +278,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="assets/rating.js"></script>
 <script src="assets/fetch_title.js"></script>
 <script src="assets/emoji.js"></script>
-<script src="assets/theme.js"></script>
 </body>
 </html>
