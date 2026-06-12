@@ -161,7 +161,9 @@ function timeAgo($datetime) {
             ← Feed
         </a>
 
-        <div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+
             <a href="?id=<?= $id ?>&sort=latest"
                class="btn btn-sm <?= $sort === 'latest' ? 'btn-primary' : 'btn-outline-primary' ?>">
                 Latest
@@ -363,6 +365,7 @@ function timeAgo($datetime) {
 </div>
 
 <script src="assets/rating.js"></script>
+<script src="assets/theme.js"></script>
 
 </body>
 </html>

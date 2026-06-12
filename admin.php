@@ -26,13 +26,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <title>Admin Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="assets/style.css" rel="stylesheet">
 </head>
 
 <body class="bg-light">
 
 <div class="container py-5" style="max-width: 400px;">
 
-    <h3 class="mb-3">Admin Login</h3>
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Admin Login</h3>
+        <button class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+    </div>
 
     <?php if ($error): ?>
         <div class="alert alert-danger"><?= htmlspecialchars($error) ?></div>
@@ -54,5 +58,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 </div>
 
+<script src="assets/theme.js"></script>
 </body>
 </html>

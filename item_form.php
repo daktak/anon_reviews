@@ -162,9 +162,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             ← Feed
         </a>
 
-        <span class="meta">
-            <?= $isEdit ? 'Edit Item (Admin)' : 'New Item' ?>
-        </span>
+        <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()" title="Toggle theme">🌙</button>
+
+            <span class="meta">
+                <?= $isEdit ? 'Edit Item (Admin)' : 'New Item' ?>
+            </span>
+        </div>
 
     </div>
 
@@ -273,5 +277,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <script src="assets/rating.js"></script>
 <script src="assets/fetch_title.js"></script>
 <script src="assets/emoji.js"></script>
+<script src="assets/theme.js"></script>
 </body>
 </html>

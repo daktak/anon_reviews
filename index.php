@@ -125,6 +125,7 @@ function timeAgo($datetime) {
         <h4 class="mb-0">Reviews</h4>
 
         <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" onclick="toggleTheme()" title="Toggle theme">🌙</button>
             <a href="item_form.php" class="btn btn-primary btn-sm">+ Add</a>
             <?php if ($isAdmin): ?>
                 <a href="logout.php" class="btn btn-outline-danger btn-sm">Logout</a>
@@ -312,5 +313,6 @@ function timeAgo($datetime) {
 
 </div>
 
+<script src="assets/theme.js"></script>
 </body>
 </html>
